@@ -1,4 +1,5 @@
 # Tofano_Imoveis_
+
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
@@ -84,6 +85,9 @@
 
   <h3>Manutenção</h3>
   <label>Valor estimado (R$): <input type="text" id="manutencao"></label>
+
+  <h3>Multa Rescisória</h3>
+  <label>Valor da multa (R$): <input type="text" id="multa"></label>
 
   <button type="submit">Calcular</button>
 </form>
@@ -210,6 +214,13 @@
       totalPagar += manutencaoTotal;
     }
 
+    // Multa rescisória
+    const multa = lerNumero('multa');
+    if (multa > 0) {
+      resumo += `<p><strong>Multa rescisória:</strong> ${formatar(multa)}</p>`;
+      totalPagar += multa;
+    }
+
     resumo += "<hr>";
     resumo += `<p><strong>Total a pagar:</strong> ${formatar(totalPagar)}</p>`;
     if (totalDevolver > 0) resumo += `<p><strong>Total a devolver:</strong> ${formatar(totalDevolver)}</p>`;
@@ -221,4 +232,3 @@
 
 </body>
 </html>
-
