@@ -1,5 +1,3 @@
-# Tofano_Imoveis_
-
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
@@ -50,16 +48,18 @@
   <h3>IPTU</h3>
   <label>Valor da parcela (R$): <input type="text" id="iptuParcela"></label>
   <label>Quantidade de parcelas: <input type="text" id="iptuQtdParcelas"></label>
+  <label>Parcelas já pagas: <input type="text" id="iptuParcelasPagas"></label>
   <label>Total do IPTU (R$): <input type="text" id="iptuTotal" readonly></label>
-  <label>Valor já pago (R$): <input type="text" id="iptuPago"></label>
+  <label>Valor já pago (R$): <input type="text" id="iptuPago" readonly></label>
   <label>Data início uso IPTU: <input type="date" id="iptuInicio" required></label>
   <label>Data fim uso IPTU: <input type="date" id="iptuFim" required></label>
 
   <h3>Seguro Incêndio</h3>
   <label>Valor da parcela (R$): <input type="text" id="seguroParcela"></label>
   <label>Quantidade de parcelas: <input type="text" id="seguroQtdParcelas"></label>
+  <label>Parcelas já pagas: <input type="text" id="seguroParcelasPagas"></label>
   <label>Valor total (R$): <input type="text" id="seguroTotal" readonly></label>
-  <label>Valor pago (R$): <input type="text" id="seguroPago"></label>
+  <label>Valor pago (R$): <input type="text" id="seguroPago" readonly></label>
   <label>Data início uso seguro: <input type="date" id="seguroInicio" required></label>
   <label>Data fim uso seguro: <input type="date" id="seguroFim" required></label>
 
@@ -100,32 +100,39 @@
     currency: 'BRL'
   }).format(valor);
 
-  // Função corrigida para evitar NaN
   const diasEntreDatas = (inicio, fim) => {
-    if (!inicio || !fim) return 0; // campos vazios
+    if (!inicio || !fim) return 0;
     const i = new Date(inicio + "T00:00:00");
     const f = new Date(fim + "T00:00:00");
-    if (isNaN(i) || isNaN(f)) return 0; // datas inválidas
-    return Math.floor((f - i) / (1000 * 60 * 60 * 24)) + 1; // inclui o dia final
+    if (isNaN(i) || isNaN(f)) return 0;
+    return Math.floor((f - i) / (1000 * 60 * 60 * 24)) + 1;
   };
 
   const lerNumero = id => parseFloat((document.getElementById(id).value || "0").replace(",", ".")) || 0;
 
-  function atualizarIptuTotal() {
+  // Atualiza IPTU total e valor pago automaticamente
+  function atualizarIptu() {
     const parcela = lerNumero('iptuParcela');
     const qtd = lerNumero('iptuQtdParcelas');
+    const pagas = lerNumero('iptuParcelasPagas');
     document.getElementById('iptuTotal').value = parcela * qtd;
+    document.getElementById('iptuPago').value = parcela * pagas;
   }
-  document.getElementById('iptuParcela').addEventListener('input', atualizarIptuTotal);
-  document.getElementById('iptuQtdParcelas').addEventListener('input', atualizarIptuTotal);
+  document.getElementById('iptuParcela').addEventListener('input', atualizarIptu);
+  document.getElementById('iptuQtdParcelas').addEventListener('input', atualizarIptu);
+  document.getElementById('iptuParcelasPagas').addEventListener('input', atualizarIptu);
 
-  function atualizarSeguroTotal() {
+  // Atualiza Seguro total e valor pago automaticamente
+  function atualizarSeguro() {
     const parcela = lerNumero('seguroParcela');
     const qtd = lerNumero('seguroQtdParcelas');
+    const pagas = lerNumero('seguroParcelasPagas');
     document.getElementById('seguroTotal').value = parcela * qtd;
+    document.getElementById('seguroPago').value = parcela * pagas;
   }
-  document.getElementById('seguroParcela').addEventListener('input', atualizarSeguroTotal);
-  document.getElementById('seguroQtdParcelas').addEventListener('input', atualizarSeguroTotal);
+  document.getElementById('seguroParcela').addEventListener('input', atualizarSeguro);
+  document.getElementById('seguroQtdParcelas').addEventListener('input', atualizarSeguro);
+  document.getElementById('seguroParcelasPagas').addEventListener('input', atualizarSeguro);
 
   document.getElementById('formulario').addEventListener('submit', function(e) {
     e.preventDefault();
