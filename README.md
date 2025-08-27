@@ -145,10 +145,8 @@
     const iptuDias = diasEntreDatas(document.getElementById('iptuInicio').value, document.getElementById('iptuFim').value);
     const iptuProporcional = (iptuTotal / 360) * iptuDias;
     const iptuDiferenca = iptuProporcional - iptuPago;
-    if (iptuPago !== 0) {
-      resumo += `<p><strong>IPTU proporcional (${iptuDias} dias):</strong> ${formatar(iptuProporcional)} - Pago: ${formatar(iptuPago)} → ${iptuDiferenca >= 0 ? "A pagar: " + formatar(iptuDiferenca) : "A devolver: " + formatar(Math.abs(iptuDiferenca))}</p>`;
-      if (iptuDiferenca > 0) totalPagar += iptuDiferenca; else totalDevolver += Math.abs(iptuDiferenca);
-    }
+    resumo += `<p><strong>IPTU proporcional (${iptuDias} dias):</strong> ${formatar(iptuProporcional)} - Pago: ${formatar(iptuPago)} → ${iptuDiferenca >= 0 ? "A pagar: " + formatar(iptuDiferenca) : "A devolver: " + formatar(Math.abs(iptuDiferenca))}</p>`;
+    if (iptuDiferenca > 0) totalPagar += iptuDiferenca; else totalDevolver += Math.abs(iptuDiferenca);
 
     // Seguro
     const seguroTotal = lerNumero('seguroTotal');
@@ -156,55 +154,43 @@
     const seguroDias = diasEntreDatas(document.getElementById('seguroInicio').value, document.getElementById('seguroFim').value);
     const seguroProporcional = (seguroTotal / 360) * seguroDias;
     const seguroDiferenca = seguroPago - seguroProporcional;
-    if (seguroPago !== 0) {
-      resumo += `<p><strong>Seguro incêndio (${seguroDias} dias):</strong> ${formatar(seguroProporcional)} - Pago: ${formatar(seguroPago)} → ${seguroDiferenca >= 0 ? "A devolver: " + formatar(seguroDiferenca) : "A pagar: " + formatar(Math.abs(seguroDiferenca))}</p>`;
-      if (seguroDiferenca < 0) totalPagar += Math.abs(seguroDiferenca); else totalDevolver += seguroDiferenca;
-    }
+    resumo += `<p><strong>Seguro incêndio (${seguroDias} dias):</strong> ${formatar(seguroProporcional)} - Pago: ${formatar(seguroPago)} → ${seguroDiferenca >= 0 ? "A devolver: " + formatar(seguroDiferenca) : "A pagar: " + formatar(Math.abs(seguroDiferenca))}</p>`;
+    if (seguroDiferenca < 0) totalPagar += Math.abs(seguroDiferenca); else totalDevolver += seguroDiferenca;
 
     // Água
     const aguaTotal = lerNumero('aguaTotal');
     const aguaPago = lerNumero('aguaPago');
     const aguaDiferenca = aguaTotal - aguaPago;
-    if (aguaPago !== 0) {
-      resumo += `<p><strong>Água:</strong> ${formatar(aguaTotal)} - Pago: ${formatar(aguaPago)} → ${aguaDiferenca >= 0 ? "A pagar: " + formatar(aguaDiferenca) : "A devolver: " + formatar(Math.abs(aguaDiferenca))}</p>`;
-      if (aguaDiferenca > 0) totalPagar += aguaDiferenca; else totalDevolver += Math.abs(aguaDiferenca);
-    }
+    resumo += `<p><strong>Água:</strong> ${formatar(aguaTotal)} - Pago: ${formatar(aguaPago)} → ${aguaDiferenca >= 0 ? "A pagar: " + formatar(aguaDiferenca) : "A devolver: " + formatar(Math.abs(aguaDiferenca))}</p>`;
+    if (aguaDiferenca > 0) totalPagar += aguaDiferenca; else totalDevolver += Math.abs(aguaDiferenca);
 
     // Luz
     const luzTotal = lerNumero('luzTotal');
     const luzPago = lerNumero('luzPago');
     const luzDiferenca = luzTotal - luzPago;
-    if (luzPago !== 0) {
-      resumo += `<p><strong>Luz:</strong> ${formatar(luzTotal)} - Pago: ${formatar(luzPago)} → ${luzDiferenca >= 0 ? "A pagar: " + formatar(luzDiferenca) : "A devolver: " + formatar(Math.abs(luzDiferenca))}</p>`;
-      if (luzDiferenca > 0) totalPagar += luzDiferenca; else totalDevolver += Math.abs(luzDiferenca);
-    }
+    resumo += `<p><strong>Luz:</strong> ${formatar(luzTotal)} - Pago: ${formatar(luzPago)} → ${luzDiferenca >= 0 ? "A pagar: " + formatar(luzDiferenca) : "A devolver: " + formatar(Math.abs(luzDiferenca))}</p>`;
+    if (luzDiferenca > 0) totalPagar += luzDiferenca; else totalDevolver += Math.abs(luzDiferenca);
 
     // Condomínio
     const condTotal = lerNumero('condTotal');
     const condPago = lerNumero('condPago');
     const condDiferenca = condTotal - condPago;
-    if (condPago !== 0) {
-      resumo += `<p><strong>Condomínio:</strong> ${formatar(condTotal)} - Pago: ${formatar(condPago)} → ${condDiferenca >= 0 ? "A pagar: " + formatar(condDiferenca) : "A devolver: " + formatar(Math.abs(condDiferenca))}</p>`;
-      if (condDiferenca > 0) totalPagar += condDiferenca; else totalDevolver += Math.abs(condDiferenca);
-    }
+    resumo += `<p><strong>Condomínio:</strong> ${formatar(condTotal)} - Pago: ${formatar(condPago)} → ${condDiferenca >= 0 ? "A pagar: " + formatar(condDiferenca) : "A devolver: " + formatar(Math.abs(condDiferenca))}</p>`;
+    if (condDiferenca > 0) totalPagar += condDiferenca; else totalDevolver += Math.abs(condDiferenca);
 
     // Gás
     const gasTotal = lerNumero('gasTotal');
     const gasPago = lerNumero('gasPago');
     const gasDiferenca = gasTotal - gasPago;
-    if (gasPago !== 0) {
-      resumo += `<p><strong>Gás:</strong> ${formatar(gasTotal)} - Pago: ${formatar(gasPago)} → ${gasDiferenca >= 0 ? "A pagar: " + formatar(gasDiferenca) : "A devolver: " + formatar(Math.abs(gasDiferenca))}</p>`;
-      if (gasDiferenca > 0) totalPagar += gasDiferenca; else totalDevolver += Math.abs(gasDiferenca);
-    }
+    resumo += `<p><strong>Gás:</strong> ${formatar(gasTotal)} - Pago: ${formatar(gasPago)} → ${gasDiferenca >= 0 ? "A pagar: " + formatar(gasDiferenca) : "A devolver: " + formatar(Math.abs(gasDiferenca))}</p>`;
+    if (gasDiferenca > 0) totalPagar += gasDiferenca; else totalDevolver += Math.abs(gasDiferenca);
 
     // Pintura
     const pinturaTotal = lerNumero('pinturaTotal');
     const pinturaPago = lerNumero('pinturaPago');
     const pinturaDiferenca = pinturaTotal - pinturaPago;
-    if (pinturaPago !== 0 && pinturaDiferenca !== 0) {
-      resumo += `<p><strong>Pintura:</strong> ${formatar(pinturaTotal)} - Pago: ${formatar(pinturaPago)} → ${pinturaDiferenca > 0 ? "A pagar: " + formatar(pinturaDiferenca) : "A devolver: " + formatar(Math.abs(pinturaDiferenca))}</p>`;
-      if (pinturaDiferenca > 0) totalPagar += pinturaDiferenca; else totalDevolver += Math.abs(pinturaDiferenca);
-    }
+    resumo += `<p><strong>Pintura:</strong> ${formatar(pinturaTotal)} - Pago: ${formatar(pinturaPago)} → ${pinturaDiferenca > 0 ? "A pagar: " + formatar(pinturaDiferenca) : "A devolver: " + formatar(Math.abs(pinturaDiferenca))}</p>`;
+    if (pinturaDiferenca > 0) totalPagar += pinturaDiferenca; else totalDevolver += Math.abs(pinturaDiferenca);
 
     // Manutenção
     const manutencaoBase = lerNumero('manutencao');
