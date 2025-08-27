@@ -80,8 +80,11 @@
   <label>Valor pago (R$): <input type="text" id="gasPago"></label>
 
   <h3>Pintura</h3>
-  <label>Valor total (R$): <input type="text" id="pinturaTotal"></label>
-  <label>Valor pago (R$): <input type="text" id="pinturaPago"></label>
+  <label>Valor da parcela (R$): <input type="text" id="pinturaParcela"></label>
+  <label>Quantidade de parcelas: <input type="text" id="pinturaQtdParcelas"></label>
+  <label>Parcelas já pagas: <input type="text" id="pinturaParcelasPagas"></label>
+  <label>Valor total (R$): <input type="text" id="pinturaTotal" readonly></label>
+  <label>Valor pago (R$): <input type="text" id="pinturaPago" readonly></label>
 
   <h3>Manutenção</h3>
   <label>Valor estimado (R$): <input type="text" id="manutencao"></label>
@@ -110,7 +113,7 @@
 
   const lerNumero = id => parseFloat((document.getElementById(id).value || "0").replace(",", ".")) || 0;
 
-  // Atualiza IPTU total e valor pago automaticamente
+  // Atualiza IPTU
   function atualizarIptu() {
     const parcela = lerNumero('iptuParcela');
     const qtd = lerNumero('iptuQtdParcelas');
@@ -122,7 +125,7 @@
   document.getElementById('iptuQtdParcelas').addEventListener('input', atualizarIptu);
   document.getElementById('iptuParcelasPagas').addEventListener('input', atualizarIptu);
 
-  // Atualiza Seguro total e valor pago automaticamente
+  // Atualiza Seguro
   function atualizarSeguro() {
     const parcela = lerNumero('seguroParcela');
     const qtd = lerNumero('seguroQtdParcelas');
@@ -134,6 +137,18 @@
   document.getElementById('seguroQtdParcelas').addEventListener('input', atualizarSeguro);
   document.getElementById('seguroParcelasPagas').addEventListener('input', atualizarSeguro);
 
+  // Atualiza Pintura
+  function atualizarPintura() {
+    const parcela = lerNumero('pinturaParcela');
+    const qtd = lerNumero('pinturaQtdParcelas');
+    const pagas = lerNumero('pinturaParcelasPagas');
+    document.getElementById('pinturaTotal').value = parcela * qtd;
+    document.getElementById('pinturaPago').value = parcela * pagas;
+  }
+  document.getElementById('pinturaParcela').addEventListener('input', atualizarPintura);
+  document.getElementById('pinturaQtdParcelas').addEventListener('input', atualizarPintura);
+  document.getElementById('pinturaParcelasPagas').addEventListener('input', atualizarPintura);
+
   document.getElementById('formulario').addEventListener('submit', function(e) {
     e.preventDefault();
 
@@ -141,7 +156,7 @@
     let totalPagar = 0;
     let totalDevolver = 0;
 
-    // Aluguel pró-rata
+    // Aluguel
     const aluguelMensal = lerNumero('aluguelMensal');
     const aluguelDias = diasEntreDatas(document.getElementById('dataInicioAluguel').value, document.getElementById('dataFimAluguel').value);
     const aluguelDiario = aluguelMensal / 30;
@@ -199,7 +214,7 @@
     const pinturaTotal = lerNumero('pinturaTotal');
     const pinturaPago = lerNumero('pinturaPago');
     const pinturaDiferenca = pinturaTotal - pinturaPago;
-    resumo += `<p><strong>Pintura:</strong> ${formatar(pinturaTotal)} - Pago: ${formatar(pinturaPago)} → ${pinturaDiferenca > 0 ? "A pagar: " + formatar(pinturaDiferenca) : "A devolver: " + formatar(Math.abs(pinturaDiferenca))}</p>`;
+    resumo += `<p><strong>Pintura:</strong> ${formatar(pinturaTotal)} - Pago: ${formatar(pinturaPago)} → ${pinturaDiferenca >= 0 ? "A pagar: " + formatar(pinturaDiferenca) : "A devolver: " + formatar(Math.abs(pinturaDiferenca))}</p>`;
     if (pinturaDiferenca > 0) totalPagar += pinturaDiferenca; else totalDevolver += Math.abs(pinturaDiferenca);
 
     // Manutenção
@@ -210,7 +225,7 @@
       totalPagar += manutencaoTotal;
     }
 
-    // Multa rescisória
+    // Multa
     const multa = lerNumero('multa');
     if (multa > 0) {
       resumo += `<p><strong>Multa rescisória:</strong> ${formatar(multa)}</p>`;
@@ -228,3 +243,4 @@
 
 </body>
 </html>
+
