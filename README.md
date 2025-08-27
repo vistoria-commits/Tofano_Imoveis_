@@ -100,13 +100,16 @@
     currency: 'BRL'
   }).format(valor);
 
+  // Função corrigida para evitar NaN
   const diasEntreDatas = (inicio, fim) => {
-    const i = new Date(inicio);
-    const f = new Date(fim);
-    return Math.floor((f - i) / (1000 * 60 * 60 * 24)) + 1;
+    if (!inicio || !fim) return 0; // campos vazios
+    const i = new Date(inicio + "T00:00:00");
+    const f = new Date(fim + "T00:00:00");
+    if (isNaN(i) || isNaN(f)) return 0; // datas inválidas
+    return Math.floor((f - i) / (1000 * 60 * 60 * 24)) + 1; // inclui o dia final
   };
 
-  const lerNumero = id => parseFloat((document.getElementById(id).value || "0").replace(",", "."));
+  const lerNumero = id => parseFloat((document.getElementById(id).value || "0").replace(",", ".")) || 0;
 
   function atualizarIptuTotal() {
     const parcela = lerNumero('iptuParcela');
