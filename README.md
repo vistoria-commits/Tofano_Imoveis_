@@ -48,8 +48,8 @@
   <h3>IPTU</h3>
   <label>Valor da parcela (R$): <input type="text" id="iptuParcela"></label>
   <label>Quantidade de parcelas: <input type="text" id="iptuQtdParcelas"></label>
-  <label>Parcelas já pagas: <input type="text" id="iptuParcelasPagas"></label>
   <label>Total do IPTU (R$): <input type="text" id="iptuTotal" readonly></label>
+  <label>Parcelas pagas: <input type="text" id="iptuParcelasPagas"></label>
   <label>Valor já pago (R$): <input type="text" id="iptuPago" readonly></label>
   <label>Data início uso IPTU: <input type="date" id="iptuInicio" required></label>
   <label>Data fim uso IPTU: <input type="date" id="iptuFim" required></label>
@@ -57,33 +57,45 @@
   <h3>Seguro Incêndio</h3>
   <label>Valor da parcela (R$): <input type="text" id="seguroParcela"></label>
   <label>Quantidade de parcelas: <input type="text" id="seguroQtdParcelas"></label>
-  <label>Parcelas já pagas: <input type="text" id="seguroParcelasPagas"></label>
   <label>Valor total (R$): <input type="text" id="seguroTotal" readonly></label>
+  <label>Parcelas pagas: <input type="text" id="seguroParcelasPagas"></label>
   <label>Valor pago (R$): <input type="text" id="seguroPago" readonly></label>
   <label>Data início uso seguro: <input type="date" id="seguroInicio" required></label>
   <label>Data fim uso seguro: <input type="date" id="seguroFim" required></label>
 
   <h3>Água</h3>
-  <label>Valor total (R$): <input type="text" id="aguaTotal"></label>
-  <label>Valor pago (R$): <input type="text" id="aguaPago"></label>
+  <label>Valor da parcela (R$): <input type="text" id="aguaParcela"></label>
+  <label>Quantidade de parcelas: <input type="text" id="aguaQtdParcelas"></label>
+  <label>Valor total (R$): <input type="text" id="aguaTotal" readonly></label>
+  <label>Parcelas pagas: <input type="text" id="aguaParcelasPagas"></label>
+  <label>Valor pago (R$): <input type="text" id="aguaPago" readonly></label>
 
   <h3>Luz</h3>
-  <label>Valor total (R$): <input type="text" id="luzTotal"></label>
-  <label>Valor pago (R$): <input type="text" id="luzPago"></label>
+  <label>Valor da parcela (R$): <input type="text" id="luzParcela"></label>
+  <label>Quantidade de parcelas: <input type="text" id="luzQtdParcelas"></label>
+  <label>Valor total (R$): <input type="text" id="luzTotal" readonly></label>
+  <label>Parcelas pagas: <input type="text" id="luzParcelasPagas"></label>
+  <label>Valor pago (R$): <input type="text" id="luzPago" readonly></label>
 
   <h3>Condomínio</h3>
-  <label>Valor total (R$): <input type="text" id="condTotal"></label>
-  <label>Valor pago (R$): <input type="text" id="condPago"></label>
+  <label>Valor da parcela (R$): <input type="text" id="condParcela"></label>
+  <label>Quantidade de parcelas: <input type="text" id="condQtdParcelas"></label>
+  <label>Valor total (R$): <input type="text" id="condTotal" readonly></label>
+  <label>Parcelas pagas: <input type="text" id="condParcelasPagas"></label>
+  <label>Valor pago (R$): <input type="text" id="condPago" readonly></label>
 
   <h3>Gás</h3>
-  <label>Valor total (R$): <input type="text" id="gasTotal"></label>
-  <label>Valor pago (R$): <input type="text" id="gasPago"></label>
+  <label>Valor da parcela (R$): <input type="text" id="gasParcela"></label>
+  <label>Quantidade de parcelas: <input type="text" id="gasQtdParcelas"></label>
+  <label>Valor total (R$): <input type="text" id="gasTotal" readonly></label>
+  <label>Parcelas pagas: <input type="text" id="gasParcelasPagas"></label>
+  <label>Valor pago (R$): <input type="text" id="gasPago" readonly></label>
 
   <h3>Pintura</h3>
   <label>Valor da parcela (R$): <input type="text" id="pinturaParcela"></label>
   <label>Quantidade de parcelas: <input type="text" id="pinturaQtdParcelas"></label>
-  <label>Parcelas já pagas: <input type="text" id="pinturaParcelasPagas"></label>
   <label>Valor total (R$): <input type="text" id="pinturaTotal" readonly></label>
+  <label>Parcelas pagas: <input type="text" id="pinturaParcelasPagas"></label>
   <label>Valor pago (R$): <input type="text" id="pinturaPago" readonly></label>
 
   <h3>Manutenção</h3>
@@ -104,50 +116,28 @@
   }).format(valor);
 
   const diasEntreDatas = (inicio, fim) => {
-    if (!inicio || !fim) return 0;
-    const i = new Date(inicio + "T00:00:00");
-    const f = new Date(fim + "T00:00:00");
+    const i = new Date(inicio);
+    const f = new Date(fim);
     if (isNaN(i) || isNaN(f)) return 0;
-    return Math.floor((f - i) / (1000 * 60 * 60 * 24)) + 1;
+    return Math.max(0, Math.floor((f - i) / (1000 * 60 * 60 * 24)) + 1);
   };
 
-  const lerNumero = id => parseFloat((document.getElementById(id).value || "0").replace(",", ".")) || 0;
+  const lerNumero = id => parseFloat((document.getElementById(id).value || "0").replace(",", "."));
 
-  // Atualiza IPTU
-  function atualizarIptu() {
-    const parcela = lerNumero('iptuParcela');
-    const qtd = lerNumero('iptuQtdParcelas');
-    const pagas = lerNumero('iptuParcelasPagas');
-    document.getElementById('iptuTotal').value = parcela * qtd;
-    document.getElementById('iptuPago').value = parcela * pagas;
+  function atualizarTotais(baseId) {
+    const parcela = lerNumero(baseId + 'Parcela');
+    const qtd = lerNumero(baseId + 'QtdParcelas');
+    const pagas = lerNumero(baseId + 'ParcelasPagas');
+    document.getElementById(baseId + 'Total').value = parcela * qtd;
+    document.getElementById(baseId + 'Pago').value = parcela * pagas;
   }
-  document.getElementById('iptuParcela').addEventListener('input', atualizarIptu);
-  document.getElementById('iptuQtdParcelas').addEventListener('input', atualizarIptu);
-  document.getElementById('iptuParcelasPagas').addEventListener('input', atualizarIptu);
 
-  // Atualiza Seguro
-  function atualizarSeguro() {
-    const parcela = lerNumero('seguroParcela');
-    const qtd = lerNumero('seguroQtdParcelas');
-    const pagas = lerNumero('seguroParcelasPagas');
-    document.getElementById('seguroTotal').value = parcela * qtd;
-    document.getElementById('seguroPago').value = parcela * pagas;
-  }
-  document.getElementById('seguroParcela').addEventListener('input', atualizarSeguro);
-  document.getElementById('seguroQtdParcelas').addEventListener('input', atualizarSeguro);
-  document.getElementById('seguroParcelasPagas').addEventListener('input', atualizarSeguro);
-
-  // Atualiza Pintura
-  function atualizarPintura() {
-    const parcela = lerNumero('pinturaParcela');
-    const qtd = lerNumero('pinturaQtdParcelas');
-    const pagas = lerNumero('pinturaParcelasPagas');
-    document.getElementById('pinturaTotal').value = parcela * qtd;
-    document.getElementById('pinturaPago').value = parcela * pagas;
-  }
-  document.getElementById('pinturaParcela').addEventListener('input', atualizarPintura);
-  document.getElementById('pinturaQtdParcelas').addEventListener('input', atualizarPintura);
-  document.getElementById('pinturaParcelasPagas').addEventListener('input', atualizarPintura);
+  ['iptu','seguro','agua','luz','cond','gas','pintura'].forEach(id => {
+    ['Parcela','QtdParcelas','ParcelasPagas'].forEach(suf => {
+      const el = document.getElementById(id + suf);
+      if (el) el.addEventListener('input', () => atualizarTotais(id));
+    });
+  });
 
   document.getElementById('formulario').addEventListener('submit', function(e) {
     e.preventDefault();
@@ -156,76 +146,58 @@
     let totalPagar = 0;
     let totalDevolver = 0;
 
-    // Aluguel
+    // Aluguel pró-rata
     const aluguelMensal = lerNumero('aluguelMensal');
     const aluguelDias = diasEntreDatas(document.getElementById('dataInicioAluguel').value, document.getElementById('dataFimAluguel').value);
-    const aluguelDiario = aluguelMensal / 30;
-    const aluguelTotal = aluguelDiario * aluguelDias;
-    resumo += `<p><strong>Aluguel pró-rata (${aluguelDias} dias):</strong> ${formatar(aluguelTotal)}</p>`;
-    totalPagar += aluguelTotal;
+    if (aluguelMensal > 0 && aluguelDias > 0) {
+      const aluguelDiario = aluguelMensal / 30;
+      const aluguelTotal = aluguelDiario * aluguelDias;
+      resumo += `<p><strong>Aluguel pró-rata (${aluguelDias} dias):</strong> ${formatar(aluguelTotal)}</p>`;
+      totalPagar += aluguelTotal;
+    }
+
+    function processarConta(nome, baseId, proporcional=false, dias=0) {
+      const total = lerNumero(baseId + 'Total');
+      const pago = lerNumero(baseId + 'Pago');
+      if (total === 0 && pago === 0) return;
+
+      let diferenca;
+      if (proporcional) {
+        const proporcionalValor = (total / 360) * dias;
+        diferenca = proporcionalValor - pago;
+        resumo += `<p><strong>${nome} (${dias} dias):</strong> ${formatar(proporcionalValor)} - Pago: ${formatar(pago)} → ${diferenca >= 0 ? "A pagar: " + formatar(diferenca) : "A devolver: " + formatar(Math.abs(diferenca))}</p>`;
+      } else {
+        diferenca = total - pago;
+        resumo += `<p><strong>${nome}:</strong> ${formatar(total)} - Pago: ${formatar(pago)} → ${diferenca >= 0 ? "A pagar: " + formatar(diferenca) : "A devolver: " + formatar(Math.abs(diferenca))}</p>`;
+      }
+
+      if (diferenca > 0) totalPagar += diferenca; else totalDevolver += Math.abs(diferenca);
+    }
 
     // IPTU
-    const iptuTotal = lerNumero('iptuTotal');
-    const iptuPago = lerNumero('iptuPago');
     const iptuDias = diasEntreDatas(document.getElementById('iptuInicio').value, document.getElementById('iptuFim').value);
-    const iptuProporcional = (iptuTotal / 360) * iptuDias;
-    const iptuDiferenca = iptuProporcional - iptuPago;
-    resumo += `<p><strong>IPTU proporcional (${iptuDias} dias):</strong> ${formatar(iptuProporcional)} - Pago: ${formatar(iptuPago)} → ${iptuDiferenca >= 0 ? "A pagar: " + formatar(iptuDiferenca) : "A devolver: " + formatar(Math.abs(iptuDiferenca))}</p>`;
-    if (iptuDiferenca > 0) totalPagar += iptuDiferenca; else totalDevolver += Math.abs(iptuDiferenca);
+    processarConta('IPTU', 'iptu', true, iptuDias);
 
     // Seguro
-    const seguroTotal = lerNumero('seguroTotal');
-    const seguroPago = lerNumero('seguroPago');
     const seguroDias = diasEntreDatas(document.getElementById('seguroInicio').value, document.getElementById('seguroFim').value);
-    const seguroProporcional = (seguroTotal / 360) * seguroDias;
-    const seguroDiferenca = seguroPago - seguroProporcional;
-    resumo += `<p><strong>Seguro incêndio (${seguroDias} dias):</strong> ${formatar(seguroProporcional)} - Pago: ${formatar(seguroPago)} → ${seguroDiferenca >= 0 ? "A devolver: " + formatar(seguroDiferenca) : "A pagar: " + formatar(Math.abs(seguroDiferenca))}</p>`;
-    if (seguroDiferenca < 0) totalPagar += Math.abs(seguroDiferenca); else totalDevolver += seguroDiferenca;
+    processarConta('Seguro Incêndio', 'seguro', true, seguroDias);
 
-    // Água
-    const aguaTotal = lerNumero('aguaTotal');
-    const aguaPago = lerNumero('aguaPago');
-    const aguaDiferenca = aguaTotal - aguaPago;
-    resumo += `<p><strong>Água:</strong> ${formatar(aguaTotal)} - Pago: ${formatar(aguaPago)} → ${aguaDiferenca >= 0 ? "A pagar: " + formatar(aguaDiferenca) : "A devolver: " + formatar(Math.abs(aguaDiferenca))}</p>`;
-    if (aguaDiferenca > 0) totalPagar += aguaDiferenca; else totalDevolver += Math.abs(aguaDiferenca);
-
-    // Luz
-    const luzTotal = lerNumero('luzTotal');
-    const luzPago = lerNumero('luzPago');
-    const luzDiferenca = luzTotal - luzPago;
-    resumo += `<p><strong>Luz:</strong> ${formatar(luzTotal)} - Pago: ${formatar(luzPago)} → ${luzDiferenca >= 0 ? "A pagar: " + formatar(luzDiferenca) : "A devolver: " + formatar(Math.abs(luzDiferenca))}</p>`;
-    if (luzDiferenca > 0) totalPagar += luzDiferenca; else totalDevolver += Math.abs(luzDiferenca);
-
-    // Condomínio
-    const condTotal = lerNumero('condTotal');
-    const condPago = lerNumero('condPago');
-    const condDiferenca = condTotal - condPago;
-    resumo += `<p><strong>Condomínio:</strong> ${formatar(condTotal)} - Pago: ${formatar(condPago)} → ${condDiferenca >= 0 ? "A pagar: " + formatar(condDiferenca) : "A devolver: " + formatar(Math.abs(condDiferenca))}</p>`;
-    if (condDiferenca > 0) totalPagar += condDiferenca; else totalDevolver += Math.abs(condDiferenca);
-
-    // Gás
-    const gasTotal = lerNumero('gasTotal');
-    const gasPago = lerNumero('gasPago');
-    const gasDiferenca = gasTotal - gasPago;
-    resumo += `<p><strong>Gás:</strong> ${formatar(gasTotal)} - Pago: ${formatar(gasPago)} → ${gasDiferenca >= 0 ? "A pagar: " + formatar(gasDiferenca) : "A devolver: " + formatar(Math.abs(gasDiferenca))}</p>`;
-    if (gasDiferenca > 0) totalPagar += gasDiferenca; else totalDevolver += Math.abs(gasDiferenca);
-
-    // Pintura
-    const pinturaTotal = lerNumero('pinturaTotal');
-    const pinturaPago = lerNumero('pinturaPago');
-    const pinturaDiferenca = pinturaTotal - pinturaPago;
-    resumo += `<p><strong>Pintura:</strong> ${formatar(pinturaTotal)} - Pago: ${formatar(pinturaPago)} → ${pinturaDiferenca >= 0 ? "A pagar: " + formatar(pinturaDiferenca) : "A devolver: " + formatar(Math.abs(pinturaDiferenca))}</p>`;
-    if (pinturaDiferenca > 0) totalPagar += pinturaDiferenca; else totalDevolver += Math.abs(pinturaDiferenca);
+    // Água, Luz, Condomínio, Gás, Pintura
+    processarConta('Água','agua');
+    processarConta('Luz','luz');
+    processarConta('Condomínio','cond');
+    processarConta('Gás','gas');
+    processarConta('Pintura','pintura');
 
     // Manutenção
     const manutencaoBase = lerNumero('manutencao');
-    const manutencaoTotal = manutencaoBase * 1.2;
-    if (manutencaoBase !== 0) {
+    if (manutencaoBase > 0) {
+      const manutencaoTotal = manutencaoBase * 1.2;
       resumo += `<p><strong>Manutenção (com 20%):</strong> ${formatar(manutencaoTotal)}</p>`;
       totalPagar += manutencaoTotal;
     }
 
-    // Multa
+    // Multa rescisória
     const multa = lerNumero('multa');
     if (multa > 0) {
       resumo += `<p><strong>Multa rescisória:</strong> ${formatar(multa)}</p>`;
