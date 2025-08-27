@@ -48,8 +48,8 @@
   <h3>IPTU</h3>
   <label>Valor da parcela (R$): <input type="text" id="iptuParcela"></label>
   <label>Quantidade de parcelas: <input type="text" id="iptuQtdParcelas"></label>
-  <label>Total do IPTU (R$): <input type="text" id="iptuTotal" readonly></label>
   <label>Parcelas pagas: <input type="text" id="iptuQtdPagas"></label>
+  <label>Total do IPTU (R$): <input type="text" id="iptuTotal" readonly></label>
   <label>Valor já pago (R$): <input type="text" id="iptuPago" readonly></label>
   <label>Data início uso IPTU: <input type="date" id="iptuInicio" required></label>
   <label>Data fim uso IPTU: <input type="date" id="iptuFim" required></label>
@@ -57,8 +57,8 @@
   <h3>Seguro Incêndio</h3>
   <label>Valor da parcela (R$): <input type="text" id="seguroParcela"></label>
   <label>Quantidade de parcelas: <input type="text" id="seguroQtdParcelas"></label>
-  <label>Valor total (R$): <input type="text" id="seguroTotal" readonly></label>
   <label>Parcelas pagas: <input type="text" id="seguroQtdPagas"></label>
+  <label>Valor total (R$): <input type="text" id="seguroTotal" readonly></label>
   <label>Valor pago (R$): <input type="text" id="seguroPago" readonly></label>
   <label>Data início uso seguro: <input type="date" id="seguroInicio" required></label>
   <label>Data fim uso seguro: <input type="date" id="seguroFim" required></label>
@@ -82,8 +82,8 @@
   <h3>Pintura</h3>
   <label>Valor da parcela (R$): <input type="text" id="pinturaParcela"></label>
   <label>Quantidade de parcelas: <input type="text" id="pinturaQtdParcelas"></label>
-  <label>Valor total (R$): <input type="text" id="pinturaTotal" readonly></label>
   <label>Parcelas pagas: <input type="text" id="pinturaQtdPagas"></label>
+  <label>Total da pintura (R$): <input type="text" id="pinturaTotal" readonly></label>
   <label>Valor pago (R$): <input type="text" id="pinturaPago" readonly></label>
 
   <h3>Manutenção</h3>
@@ -108,44 +108,61 @@
     const i = new Date(inicio);
     const f = new Date(fim);
     if (isNaN(i) || isNaN(f)) return 0;
-    return Math.max(0, Math.floor((f - i) / (1000 * 60 * 60 * 24)) + 1);
+    return Math.floor((f - i) / (1000 * 60 * 60 * 24)) + 1;
   };
 
-  const lerNumero = id => parseFloat((document.getElementById(id).value || "0").replace(",", "."));
+  const lerNumero = id => parseFloat((document.getElementById(id).value || "0").replace(",", ".")) || 0;
 
-  // Atualizadores automáticos
+  // Atualizações automáticas IPTU
   function atualizarIptu() {
     const parcela = lerNumero('iptuParcela');
     const qtd = lerNumero('iptuQtdParcelas');
-    const qtdPagas = lerNumero('iptuQtdPagas');
+    const pagas = lerNumero('iptuQtdPagas');
     document.getElementById('iptuTotal').value = parcela * qtd;
-    document.getElementById('iptuPago').value = parcela * qtdPagas;
+    document.getElementById('iptuPago').value = parcela * pagas;
   }
-  document.getElementById('iptuParcela').addEventListener('input', atualizarIptu);
-  document.getElementById('iptuQtdParcelas').addEventListener('input', atualizarIptu);
-  document.getElementById('iptuQtdPagas').addEventListener('input', atualizarIptu);
+  ['iptuParcela','iptuQtdParcelas','iptuQtdPagas'].forEach(id=>{
+    document.getElementById(id).addEventListener('input', atualizarIptu);
+  });
 
+  // Atualizações automáticas Seguro
   function atualizarSeguro() {
     const parcela = lerNumero('seguroParcela');
     const qtd = lerNumero('seguroQtdParcelas');
-    const qtdPagas = lerNumero('seguroQtdPagas');
+    const pagas = lerNumero('seguroQtdPagas');
     document.getElementById('seguroTotal').value = parcela * qtd;
-    document.getElementById('seguroPago').value = parcela * qtdPagas;
+    document.getElementById('seguroPago').value = parcela * pagas;
   }
-  document.getElementById('seguroParcela').addEventListener('input', atualizarSeguro);
-  document.getElementById('seguroQtdParcelas').addEventListener('input', atualizarSeguro);
-  document.getElementById('seguroQtdPagas').addEventListener('input', atualizarSeguro);
+  ['seguroParcela','seguroQtdParcelas','seguroQtdPagas'].forEach(id=>{
+    document.getElementById(id).addEventListener('input', atualizarSeguro);
+  });
 
+  // Atualizações automáticas Pintura
   function atualizarPintura() {
     const parcela = lerNumero('pinturaParcela');
     const qtd = lerNumero('pinturaQtdParcelas');
-    const qtdPagas = lerNumero('pinturaQtdPagas');
+    const pagas = lerNumero('pinturaQtdPagas');
     document.getElementById('pinturaTotal').value = parcela * qtd;
-    document.getElementById('pinturaPago').value = parcela * qtdPagas;
+    document.getElementById('pinturaPago').value = parcela * pagas;
   }
-  document.getElementById('pinturaParcela').addEventListener('input', atualizarPintura);
-  document.getElementById('pinturaQtdParcelas').addEventListener('input', atualizarPintura);
-  document.getElementById('pinturaQtdPagas').addEventListener('input', atualizarPintura);
+  ['pinturaParcela','pinturaQtdParcelas','pinturaQtdPagas'].forEach(id=>{
+    document.getElementById(id).addEventListener('input', atualizarPintura);
+  });
+
+  // Navegação com Enter e Shift+Enter
+  const inputs = document.querySelectorAll("input, button");
+  inputs.forEach((input, index) => {
+    input.addEventListener("keydown", function(e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        if (e.shiftKey) {
+          if (index > 0) inputs[index - 1].focus();
+        } else {
+          if (index < inputs.length - 1) inputs[index + 1].focus();
+        }
+      }
+    });
+  });
 
   document.getElementById('formulario').addEventListener('submit', function(e) {
     e.preventDefault();
@@ -156,18 +173,18 @@
 
     // Aluguel pró-rata
     const aluguelMensal = lerNumero('aluguelMensal');
-    const aluguelDias = diasEntreDatas(document.getElementById('dataInicioAluguel').value, document.getElementById('dataFimAluguel').value);
-    if (aluguelMensal > 0 && aluguelDias > 0) {
+    const dias = diasEntreDatas(document.getElementById('dataInicioAluguel').value, document.getElementById('dataFimAluguel').value);
+    if (aluguelMensal > 0 && dias > 0) {
       const aluguelDiario = aluguelMensal / 30;
-      const aluguelTotal = aluguelDiario * aluguelDias;
-      resumo += `<p><strong>Aluguel pró-rata (${aluguelDias} dias):</strong> ${formatar(aluguelTotal)}</p>`;
+      const aluguelTotal = aluguelDiario * dias;
+      resumo += `<p><strong>Aluguel pró-rata (${dias} dias):</strong> ${formatar(aluguelTotal)}</p>`;
       totalPagar += aluguelTotal;
     }
 
     // IPTU
     const iptuTotal = lerNumero('iptuTotal');
     const iptuPago = lerNumero('iptuPago');
-    if (iptuTotal > 0 || iptuPago > 0) {
+    if (iptuTotal > 0 && iptuPago > 0) {
       const iptuDias = diasEntreDatas(document.getElementById('iptuInicio').value, document.getElementById('iptuFim').value);
       const iptuProporcional = (iptuTotal / 360) * iptuDias;
       const iptuDiferenca = iptuProporcional - iptuPago;
@@ -178,7 +195,7 @@
     // Seguro
     const seguroTotal = lerNumero('seguroTotal');
     const seguroPago = lerNumero('seguroPago');
-    if (seguroTotal > 0 || seguroPago > 0) {
+    if (seguroTotal > 0 && seguroPago > 0) {
       const seguroDias = diasEntreDatas(document.getElementById('seguroInicio').value, document.getElementById('seguroFim').value);
       const seguroProporcional = (seguroTotal / 360) * seguroDias;
       const seguroDiferenca = seguroPago - seguroProporcional;
@@ -189,7 +206,7 @@
     // Água
     const aguaTotal = lerNumero('aguaTotal');
     const aguaPago = lerNumero('aguaPago');
-    if (aguaTotal > 0 || aguaPago > 0) {
+    if (aguaTotal > 0 && aguaPago > 0) {
       const aguaDiferenca = aguaTotal - aguaPago;
       resumo += `<p><strong>Água:</strong> ${formatar(aguaTotal)} - Pago: ${formatar(aguaPago)} → ${aguaDiferenca >= 0 ? "A pagar: " + formatar(aguaDiferenca) : "A devolver: " + formatar(Math.abs(aguaDiferenca))}</p>`;
       if (aguaDiferenca > 0) totalPagar += aguaDiferenca; else totalDevolver += Math.abs(aguaDiferenca);
@@ -198,7 +215,7 @@
     // Luz
     const luzTotal = lerNumero('luzTotal');
     const luzPago = lerNumero('luzPago');
-    if (luzTotal > 0 || luzPago > 0) {
+    if (luzTotal > 0 && luzPago > 0) {
       const luzDiferenca = luzTotal - luzPago;
       resumo += `<p><strong>Luz:</strong> ${formatar(luzTotal)} - Pago: ${formatar(luzPago)} → ${luzDiferenca >= 0 ? "A pagar: " + formatar(luzDiferenca) : "A devolver: " + formatar(Math.abs(luzDiferenca))}</p>`;
       if (luzDiferenca > 0) totalPagar += luzDiferenca; else totalDevolver += Math.abs(luzDiferenca);
@@ -207,7 +224,7 @@
     // Condomínio
     const condTotal = lerNumero('condTotal');
     const condPago = lerNumero('condPago');
-    if (condTotal > 0 || condPago > 0) {
+    if (condTotal > 0 && condPago > 0) {
       const condDiferenca = condTotal - condPago;
       resumo += `<p><strong>Condomínio:</strong> ${formatar(condTotal)} - Pago: ${formatar(condPago)} → ${condDiferenca >= 0 ? "A pagar: " + formatar(condDiferenca) : "A devolver: " + formatar(Math.abs(condDiferenca))}</p>`;
       if (condDiferenca > 0) totalPagar += condDiferenca; else totalDevolver += Math.abs(condDiferenca);
@@ -216,7 +233,7 @@
     // Gás
     const gasTotal = lerNumero('gasTotal');
     const gasPago = lerNumero('gasPago');
-    if (gasTotal > 0 || gasPago > 0) {
+    if (gasTotal > 0 && gasPago > 0) {
       const gasDiferenca = gasTotal - gasPago;
       resumo += `<p><strong>Gás:</strong> ${formatar(gasTotal)} - Pago: ${formatar(gasPago)} → ${gasDiferenca >= 0 ? "A pagar: " + formatar(gasDiferenca) : "A devolver: " + formatar(Math.abs(gasDiferenca))}</p>`;
       if (gasDiferenca > 0) totalPagar += gasDiferenca; else totalDevolver += Math.abs(gasDiferenca);
@@ -225,7 +242,7 @@
     // Pintura
     const pinturaTotal = lerNumero('pinturaTotal');
     const pinturaPago = lerNumero('pinturaPago');
-    if (pinturaTotal > 0 || pinturaPago > 0) {
+    if (pinturaTotal > 0 && pinturaPago > 0) {
       const pinturaDiferenca = pinturaTotal - pinturaPago;
       resumo += `<p><strong>Pintura:</strong> ${formatar(pinturaTotal)} - Pago: ${formatar(pinturaPago)} → ${pinturaDiferenca >= 0 ? "A pagar: " + formatar(pinturaDiferenca) : "A devolver: " + formatar(Math.abs(pinturaDiferenca))}</p>`;
       if (pinturaDiferenca > 0) totalPagar += pinturaDiferenca; else totalDevolver += Math.abs(pinturaDiferenca);
@@ -257,5 +274,3 @@
 
 </body>
 </html>
-
-
