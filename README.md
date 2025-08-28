@@ -192,7 +192,7 @@
     // IPTU proporcional
     const iptuTotal = lerNumero('iptuTotal');
     const iptuPago = lerNumero('iptuPago');
-    if (iptuTotal > 0 && iptuPago > 0) {
+    if (iptuTotal > 0) {
       const iptuDias = diasEntreDatas(document.getElementById('iptuInicio').value, document.getElementById('iptuFim').value);
       const iptuProporcional = (iptuTotal / 360) * iptuDias;
       const iptuDiferenca = iptuProporcional - iptuPago;
@@ -203,17 +203,17 @@
     // Seguro proporcional
     const seguroTotal = lerNumero('seguroTotal');
     const seguroPago = lerNumero('seguroPago');
-    if (seguroTotal > 0 && seguroPago > 0) {
+    if (seguroTotal > 0) {
       const seguroDias = diasEntreDatas(document.getElementById('seguroInicio').value, document.getElementById('seguroFim').value);
       const seguroProporcional = (seguroTotal / 360) * seguroDias;
-      const seguroDiferenca = seguroPago - seguroProporcional;
-      resumo += `<p><strong>Seguro incêndio (${seguroDias} dias):</strong> ${formatar(seguroProporcional)} - Pago: ${formatar(seguroPago)} → ${seguroDiferenca >= 0 ? "A devolver: " + formatar(seguroDiferenca) : "A pagar: " + formatar(Math.abs(seguroDiferenca))}</p>`;
-      if (seguroDiferenca < 0) totalPagar += Math.abs(seguroDiferenca); else totalDevolver += seguroDiferenca;
+      const seguroDiferenca = seguroProporcional - seguroPago;
+      resumo += `<p><strong>Seguro incêndio (${seguroDias} dias):</strong> ${formatar(seguroProporcional)} - Pago: ${formatar(seguroPago)} → ${seguroDiferenca >= 0 ? "A pagar: " + formatar(seguroDiferenca) : "A devolver: " + formatar(Math.abs(seguroDiferenca))}</p>`;
+      if (seguroDiferenca > 0) totalPagar += seguroDiferenca; else totalDevolver += Math.abs(seguroDiferenca);
     }
 
     // Função genérica para contas mensais (Água, Luz, Condomínio, Gás)
     function calcularConta(mensal, pago, inicio, fim, nome) {
-      if (mensal <= 0 || pago <= 0) return "";
+      if (mensal <= 0) return "";
       const dias = diasEntreDatas(inicio, fim);
       if (dias <= 0) return "";
       const valorDiario = mensal / 30;
@@ -238,7 +238,7 @@
     // Pintura
     const pinturaTotal = lerNumero('pinturaTotal');
     const pinturaPago = lerNumero('pinturaPago');
-    if (pinturaTotal > 0 && pinturaPago > 0) {
+    if (pinturaTotal > 0) {
       const pinturaDiferenca = pinturaTotal - pinturaPago;
       resumo += `<p><strong>Pintura:</strong> ${formatar(pinturaTotal)} - Pago: ${formatar(pinturaPago)} → ${pinturaDiferenca >= 0 ? "A pagar: " + formatar(pinturaDiferenca) : "A devolver: " + formatar(Math.abs(pinturaDiferenca))}</p>`;
       if (pinturaDiferenca > 0) totalPagar += pinturaDiferenca; else totalDevolver += Math.abs(pinturaDiferenca);
@@ -270,5 +270,3 @@
 
 </body>
 </html>
-
-
