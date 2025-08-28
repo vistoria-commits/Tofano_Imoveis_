@@ -196,7 +196,9 @@
       const iptuDias = diasEntreDatas(document.getElementById('iptuInicio').value, document.getElementById('iptuFim').value);
       const iptuProporcional = (iptuTotal / 360) * iptuDias;
       const iptuDiferenca = iptuProporcional - iptuPago;
-      resumo += `<p><strong>IPTU proporcional (${iptuDias} dias):</strong> ${formatar(iptuProporcional)} - Pago: ${formatar(iptuPago)} → ${iptuDiferenca >= 0 ? "A pagar: " + formatar(iptuDiferenca) : "A devolver: " + formatar(Math.abs(iptuDiferenca))}</p>`;
+      resumo += `<p><strong>IPTU proporcional (${iptuDias} dias):</strong> ${formatar(iptuProporcional)}`;
+      if (iptuPago > 0) resumo += ` - Pago: ${formatar(iptuPago)}`;
+      resumo += ` → ${iptuDiferenca >= 0 ? "A pagar: " + formatar(iptuDiferenca) : "A devolver: " + formatar(Math.abs(iptuDiferenca))}</p>`;
       if (iptuDiferenca > 0) totalPagar += iptuDiferenca; else totalDevolver += Math.abs(iptuDiferenca);
     }
 
@@ -207,7 +209,9 @@
       const seguroDias = diasEntreDatas(document.getElementById('seguroInicio').value, document.getElementById('seguroFim').value);
       const seguroProporcional = (seguroTotal / 360) * seguroDias;
       const seguroDiferenca = seguroProporcional - seguroPago;
-      resumo += `<p><strong>Seguro incêndio (${seguroDias} dias):</strong> ${formatar(seguroProporcional)} - Pago: ${formatar(seguroPago)} → ${seguroDiferenca >= 0 ? "A pagar: " + formatar(seguroDiferenca) : "A devolver: " + formatar(Math.abs(seguroDiferenca))}</p>`;
+      resumo += `<p><strong>Seguro incêndio (${seguroDias} dias):</strong> ${formatar(seguroProporcional)}`;
+      if (seguroPago > 0) resumo += ` - Pago: ${formatar(seguroPago)}`;
+      resumo += ` → ${seguroDiferenca >= 0 ? "A pagar: " + formatar(seguroDiferenca) : "A devolver: " + formatar(Math.abs(seguroDiferenca))}</p>`;
       if (seguroDiferenca > 0) totalPagar += seguroDiferenca; else totalDevolver += Math.abs(seguroDiferenca);
     }
 
@@ -219,7 +223,9 @@
       const valorDiario = mensal / 30;
       const proporcional = valorDiario * dias;
       const diferenca = proporcional - pago;
-      let texto = `<p><strong>${nome} (${dias} dias):</strong> ${formatar(proporcional)} - Pago: ${formatar(pago)} → `;
+      let texto = `<p><strong>${nome} (${dias} dias):</strong> ${formatar(proporcional)}`;
+      if (pago > 0) texto += ` - Pago: ${formatar(pago)}`;
+      texto += ` → `;
       if (diferenca > 0) {
         texto += "A pagar: " + formatar(diferenca) + "</p>";
         totalPagar += diferenca;
@@ -240,7 +246,9 @@
     const pinturaPago = lerNumero('pinturaPago');
     if (pinturaTotal > 0) {
       const pinturaDiferenca = pinturaTotal - pinturaPago;
-      resumo += `<p><strong>Pintura:</strong> ${formatar(pinturaTotal)} - Pago: ${formatar(pinturaPago)} → ${pinturaDiferenca >= 0 ? "A pagar: " + formatar(pinturaDiferenca) : "A devolver: " + formatar(Math.abs(pinturaDiferenca))}</p>`;
+      resumo += `<p><strong>Pintura:</strong> ${formatar(pinturaTotal)}`;
+      if (pinturaPago > 0) resumo += ` - Pago: ${formatar(pinturaPago)}`;
+      resumo += ` → ${pinturaDiferenca >= 0 ? "A pagar: " + formatar(pinturaDiferenca) : "A devolver: " + formatar(Math.abs(pinturaDiferenca))}</p>`;
       if (pinturaDiferenca > 0) totalPagar += pinturaDiferenca; else totalDevolver += Math.abs(pinturaDiferenca);
     }
 
