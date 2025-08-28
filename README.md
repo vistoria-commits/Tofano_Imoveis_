@@ -267,9 +267,13 @@
       totalPagar += multa;
     }
 
-    resumo += "<hr>";
+        resumo += "<hr>";
     resumo += `<p><strong>Total a pagar:</strong> ${formatar(totalPagar)}</p>`;
     if (totalDevolver > 0) resumo += `<p><strong>Total a devolver:</strong> ${formatar(totalDevolver)}</p>`;
+
+    // Novo: saldo líquido
+    const saldo = totalPagar - totalDevolver;
+    resumo += `<p><strong>Saldo final (${saldo >= 0 ? "a pagar" : "a receber"}):</strong> ${formatar(Math.abs(saldo))}</p>`;
 
     document.getElementById('resultado').innerHTML = resumo;
     document.getElementById('resultado').style.display = 'block';
