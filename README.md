@@ -106,34 +106,22 @@
 <div class="resultado" id="resultado" style="display: none;"></div>
 
 <script>
-  // ======== Utilitários ========
   const formatar = valor => new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL'
   }).format(valor);
-  const round2 = n => Math.round((n + Number.EPSILON) * 100) / 100;
-  const lerNumero = id => {
-    const raw = (document.getElementById(id).value || "").trim();
-    if (!raw) return 0;
-    return parseFloat(raw.replace(/\./g, '').replace(',', '.')) || 0;
-  };
-  const toUTCDate = (s) => {
-    if (!s) return null;
-    const [y, m, d] = s.split('-').map(Number);
-    return new Date(Date.UTC(y, m - 1, d));
-  };
-  function dias360(inicio, fim) {
-    const i = toUTCDate(inicio);
-    const f = toUTCDate(fim);
-    if (!i || !f) return 0;
-    let D1 = i.getUTCDate(), M1 = i.getUTCMonth() + 1, Y1 = i.getUTCFullYear();
-    let D2 = f.getUTCDate(), M2 = f.getUTCMonth() + 1, Y2 = f.getUTCFullYear();
-    if (D1 === 31) D1 = 30;
-    if (D2 === 31) D2 = 30;
-    return (Y2 - Y1) * 360 + (M2 - M1) * 30 + (D2 - D1);
-  }
 
-  // ======== Atualizações automáticas ========
+  const diasEntreDatas = (inicio, fim) => {
+    if (!inicio || !fim) return 0;
+    const i = new Date(inicio);
+    const f = new Date(fim);
+    if (isNaN(i) || isNaN(f)) return 0;
+    return Math.floor((f - i) / (1000 * 60 * 60 * 24)) + 1;
+  };
+
+  const lerNumero = id => parseFloat((document.getElementById(id).value || "0").replace(",", ".")) || 0;
+
+  // Atualizações automáticas IPTU
   function atualizarIptu() {
     const parcela = lerNumero('iptuParcela');
     const qtd = lerNumero('iptuQtdParcelas');
@@ -144,6 +132,8 @@
   ['iptuParcela','iptuQtdParcelas','iptuQtdPagas'].forEach(id=>{
     document.getElementById(id).addEventListener('input', atualizarIptu);
   });
+
+  // Atualizações automáticas Seguro
   function atualizarSeguro() {
     const parcela = lerNumero('seguroParcela');
     const qtd = lerNumero('seguroQtdParcelas');
@@ -154,6 +144,8 @@
   ['seguroParcela','seguroQtdParcelas','seguroQtdPagas'].forEach(id=>{
     document.getElementById(id).addEventListener('input', atualizarSeguro);
   });
+
+  // Atualizações automáticas Pintura
   function atualizarPintura() {
     const parcela = lerNumero('pinturaParcela');
     const qtd = lerNumero('pinturaQtdParcelas');
@@ -165,7 +157,7 @@
     document.getElementById(id).addEventListener('input', atualizarPintura);
   });
 
-  // ======== Navegação com Enter ========
+  // Navegação com Enter e Shift+Enter
   const inputs = document.querySelectorAll("input, button");
   inputs.forEach((input, index) => {
     input.addEventListener("keydown", function(e) {
@@ -180,55 +172,57 @@
     });
   });
 
-  // ======== Cálculo principal ========
   document.getElementById('formulario').addEventListener('submit', function(e) {
     e.preventDefault();
+
     let resumo = "<h3>Resumo:</h3>";
     let totalPagar = 0;
     let totalDevolver = 0;
 
     // Aluguel pró-rata
     const aluguelMensal = lerNumero('aluguelMensal');
-    const dias = dias360(document.getElementById('dataInicioAluguel').value, document.getElementById('dataFimAluguel').value);
+    const dias = diasEntreDatas(document.getElementById('dataInicioAluguel').value, document.getElementById('dataFimAluguel').value);
     if (aluguelMensal > 0 && dias > 0) {
-      const aluguelTotal = round2((aluguelMensal / 30) * dias);
+      const aluguelDiario = aluguelMensal / 30;
+      const aluguelTotal = aluguelDiario * dias;
       resumo += `<p><strong>Aluguel pró-rata (${dias} dias):</strong> ${formatar(aluguelTotal)}</p>`;
       totalPagar += aluguelTotal;
     }
 
-    // IPTU
+    // IPTU proporcional
     const iptuTotal = lerNumero('iptuTotal');
     const iptuPago = lerNumero('iptuPago');
     if (iptuTotal > 0) {
-      const iptuDias = dias360(document.getElementById('iptuInicio').value, document.getElementById('iptuFim').value);
-      const iptuProporcional = round2((iptuTotal / 360) * iptuDias);
-      const iptuDiferenca = round2(iptuProporcional - iptuPago);
+      const iptuDias = diasEntreDatas(document.getElementById('iptuInicio').value, document.getElementById('iptuFim').value);
+      const iptuProporcional = (iptuTotal / 360) * iptuDias;
+      const iptuDiferenca = iptuProporcional - iptuPago;
       resumo += `<p><strong>IPTU proporcional (${iptuDias} dias):</strong> ${formatar(iptuProporcional)}`;
       if (iptuPago > 0) resumo += ` - Pago: ${formatar(iptuPago)}`;
       resumo += ` → ${iptuDiferenca >= 0 ? "A pagar: " + formatar(iptuDiferenca) : "A devolver: " + formatar(Math.abs(iptuDiferenca))}</p>`;
       if (iptuDiferenca > 0) totalPagar += iptuDiferenca; else totalDevolver += Math.abs(iptuDiferenca);
     }
 
-    // Seguro
+    // Seguro proporcional
     const seguroTotal = lerNumero('seguroTotal');
     const seguroPago = lerNumero('seguroPago');
     if (seguroTotal > 0) {
-      const seguroDias = dias360(document.getElementById('seguroInicio').value, document.getElementById('seguroFim').value);
-      const seguroProporcional = round2((seguroTotal / 360) * seguroDias);
-      const seguroDiferenca = round2(seguroProporcional - seguroPago);
+      const seguroDias = diasEntreDatas(document.getElementById('seguroInicio').value, document.getElementById('seguroFim').value);
+      const seguroProporcional = (seguroTotal / 360) * seguroDias;
+      const seguroDiferenca = seguroProporcional - seguroPago;
       resumo += `<p><strong>Seguro incêndio (${seguroDias} dias):</strong> ${formatar(seguroProporcional)}`;
       if (seguroPago > 0) resumo += ` - Pago: ${formatar(seguroPago)}`;
       resumo += ` → ${seguroDiferenca >= 0 ? "A pagar: " + formatar(seguroDiferenca) : "A devolver: " + formatar(Math.abs(seguroDiferenca))}</p>`;
       if (seguroDiferenca > 0) totalPagar += seguroDiferenca; else totalDevolver += Math.abs(seguroDiferenca);
     }
 
-    // Contas mensais
+    // Função genérica para contas mensais (Água, Luz, Condomínio, Gás)
     function calcularConta(mensal, pago, inicio, fim, nome) {
       if (mensal <= 0) return "";
-      const dias = dias360(inicio, fim);
+      const dias = diasEntreDatas(inicio, fim);
       if (dias <= 0) return "";
-      const proporcional = round2((mensal / 30) * dias);
-      const diferenca = round2(proporcional - pago);
+      const valorDiario = mensal / 30;
+      const proporcional = valorDiario * dias;
+      const diferenca = proporcional - pago;
       let texto = `<p><strong>${nome} (${dias} dias):</strong> ${formatar(proporcional)}`;
       if (pago > 0) texto += ` - Pago: ${formatar(pago)}`;
       texto += ` → `;
@@ -241,6 +235,7 @@
       }
       return texto;
     }
+
     resumo += calcularConta(lerNumero('aguaTotal'), lerNumero('aguaPago'), document.getElementById('aguaInicio').value, document.getElementById('aguaFim').value, "Água");
     resumo += calcularConta(lerNumero('luzTotal'), lerNumero('luzPago'), document.getElementById('luzInicio').value, document.getElementById('luzFim').value, "Luz");
     resumo += calcularConta(lerNumero('condTotal'), lerNumero('condPago'), document.getElementById('condInicio').value, document.getElementById('condFim').value, "Condomínio");
@@ -250,7 +245,7 @@
     const pinturaTotal = lerNumero('pinturaTotal');
     const pinturaPago = lerNumero('pinturaPago');
     if (pinturaTotal > 0) {
-      const pinturaDiferenca = round2(pinturaTotal - pinturaPago);
+      const pinturaDiferenca = pinturaTotal - pinturaPago;
       resumo += `<p><strong>Pintura:</strong> ${formatar(pinturaTotal)}`;
       if (pinturaPago > 0) resumo += ` - Pago: ${formatar(pinturaPago)}`;
       resumo += ` → ${pinturaDiferenca >= 0 ? "A pagar: " + formatar(pinturaDiferenca) : "A devolver: " + formatar(Math.abs(pinturaDiferenca))}</p>`;
@@ -260,22 +255,24 @@
     // Manutenção
     const manutencaoBase = lerNumero('manutencao');
     if (manutencaoBase > 0) {
-      const manutencaoTotal = round2(manutencaoBase * 1.2);
+      const manutencaoTotal = manutencaoBase * 1.2;
       resumo += `<p><strong>Manutenção (com 20%):</strong> ${formatar(manutencaoTotal)}</p>`;
       totalPagar += manutencaoTotal;
     }
 
-    // Multa
+    // Multa rescisória
     const multa = lerNumero('multa');
     if (multa > 0) {
       resumo += `<p><strong>Multa rescisória:</strong> ${formatar(multa)}</p>`;
       totalPagar += multa;
     }
 
-    resumo += "<hr>";
+        resumo += "<hr>";
     resumo += `<p><strong>Total a pagar:</strong> ${formatar(totalPagar)}</p>`;
     if (totalDevolver > 0) resumo += `<p><strong>Total a devolver:</strong> ${formatar(totalDevolver)}</p>`;
-    const saldo = round2(totalPagar - totalDevolver);
+
+    // Novo: saldo líquido
+    const saldo = totalPagar - totalDevolver;
     resumo += `<p><strong>Saldo final (${saldo >= 0 ? "a pagar" : "a receber"}):</strong> ${formatar(Math.abs(saldo))}</p>`;
 
     document.getElementById('resultado').innerHTML = resumo;
@@ -285,4 +282,3 @@
 
 </body>
 </html>
-
