@@ -111,6 +111,14 @@
     currency: 'BRL'
   }).format(valor);
 
+  const lerNumero = id => {
+    let valor = (document.getElementById(id).value || "0")
+      .replace(/[R$\s]/g, "")
+      .replace(/\./g, "")
+      .replace(",", ".");
+    return parseFloat(valor) || 0;
+  };
+
   const diasEntreDatas = (inicio, fim) => {
     if (!inicio || !fim) return 0;
     const i = new Date(inicio);
@@ -119,45 +127,39 @@
     return Math.floor((f - i) / (1000 * 60 * 60 * 24)) + 1;
   };
 
-  const lerNumero = id => parseFloat((document.getElementById(id).value || "0").replace(",", ".")) || 0;
-
-  // Atualizações automáticas IPTU
   function atualizarIptu() {
     const parcela = lerNumero('iptuParcela');
     const qtd = lerNumero('iptuQtdParcelas');
     const pagas = lerNumero('iptuQtdPagas');
-    document.getElementById('iptuTotal').value = parcela * qtd;
-    document.getElementById('iptuPago').value = parcela * pagas;
+    document.getElementById('iptuTotal').value = formatar(parcela * qtd);
+    document.getElementById('iptuPago').value = formatar(parcela * pagas);
   }
   ['iptuParcela','iptuQtdParcelas','iptuQtdPagas'].forEach(id=>{
     document.getElementById(id).addEventListener('input', atualizarIptu);
   });
 
-  // Atualizações automáticas Seguro
   function atualizarSeguro() {
     const parcela = lerNumero('seguroParcela');
     const qtd = lerNumero('seguroQtdParcelas');
     const pagas = lerNumero('seguroQtdPagas');
-    document.getElementById('seguroTotal').value = parcela * qtd;
-    document.getElementById('seguroPago').value = parcela * pagas;
+    document.getElementById('seguroTotal').value = formatar(parcela * qtd);
+    document.getElementById('seguroPago').value = formatar(parcela * pagas);
   }
   ['seguroParcela','seguroQtdParcelas','seguroQtdPagas'].forEach(id=>{
     document.getElementById(id).addEventListener('input', atualizarSeguro);
   });
 
-  // Atualizações automáticas Pintura
   function atualizarPintura() {
     const parcela = lerNumero('pinturaParcela');
     const qtd = lerNumero('pinturaQtdParcelas');
     const pagas = lerNumero('pinturaQtdPagas');
-    document.getElementById('pinturaTotal').value = parcela * qtd;
-    document.getElementById('pinturaPago').value = parcela * pagas;
+    document.getElementById('pinturaTotal').value = formatar(parcela * qtd);
+    document.getElementById('pinturaPago').value = formatar(parcela * pagas);
   }
   ['pinturaParcela','pinturaQtdParcelas','pinturaQtdPagas'].forEach(id=>{
     document.getElementById(id).addEventListener('input', atualizarPintura);
   });
 
-  // Navegação com Enter e Shift+Enter
   const inputs = document.querySelectorAll("input, button");
   inputs.forEach((input, index) => {
     input.addEventListener("keydown", function(e) {
@@ -179,7 +181,6 @@
     let totalPagar = 0;
     let totalDevolver = 0;
 
-    // Aluguel pró-rata
     const aluguelMensal = lerNumero('aluguelMensal');
     const dias = diasEntreDatas(document.getElementById('dataInicioAluguel').value, document.getElementById('dataFimAluguel').value);
     if (aluguelMensal > 0 && dias > 0) {
@@ -189,7 +190,6 @@
       totalPagar += aluguelTotal;
     }
 
-    // IPTU proporcional
     const iptuTotal = lerNumero('iptuTotal');
     const iptuPago = lerNumero('iptuPago');
     if (iptuTotal > 0) {
@@ -202,7 +202,6 @@
       if (iptuDiferenca > 0) totalPagar += iptuDiferenca; else totalDevolver += Math.abs(iptuDiferenca);
     }
 
-    // Seguro proporcional
     const seguroTotal = lerNumero('seguroTotal');
     const seguroPago = lerNumero('seguroPago');
     if (seguroTotal > 0) {
@@ -215,7 +214,6 @@
       if (seguroDiferenca > 0) totalPagar += seguroDiferenca; else totalDevolver += Math.abs(seguroDiferenca);
     }
 
-    // Função genérica para contas mensais (Água, Luz, Condomínio, Gás)
     function calcularConta(mensal, pago, inicio, fim, nome) {
       if (mensal <= 0) return "";
       const dias = diasEntreDatas(inicio, fim);
@@ -241,7 +239,6 @@
     resumo += calcularConta(lerNumero('condTotal'), lerNumero('condPago'), document.getElementById('condInicio').value, document.getElementById('condFim').value, "Condomínio");
     resumo += calcularConta(lerNumero('gasTotal'), lerNumero('gasPago'), document.getElementById('gasInicio').value, document.getElementById('gasFim').value, "Gás");
 
-    // Pintura
     const pinturaTotal = lerNumero('pinturaTotal');
     const pinturaPago = lerNumero('pinturaPago');
     if (pinturaTotal > 0) {
@@ -252,7 +249,6 @@
       if (pinturaDiferenca > 0) totalPagar += pinturaDiferenca; else totalDevolver += Math.abs(pinturaDiferenca);
     }
 
-    // Manutenção
     const manutencaoBase = lerNumero('manutencao');
     if (manutencaoBase > 0) {
       const manutencaoTotal = manutencaoBase * 1.2;
@@ -260,18 +256,16 @@
       totalPagar += manutencaoTotal;
     }
 
-    // Multa rescisória
     const multa = lerNumero('multa');
     if (multa > 0) {
       resumo += `<p><strong>Multa rescisória:</strong> ${formatar(multa)}</p>`;
       totalPagar += multa;
     }
 
-        resumo += "<hr>";
+    resumo += "<hr>";
     resumo += `<p><strong>Total a pagar:</strong> ${formatar(totalPagar)}</p>`;
     if (totalDevolver > 0) resumo += `<p><strong>Total a devolver:</strong> ${formatar(totalDevolver)}</p>`;
 
-    // Novo: saldo líquido
     const saldo = totalPagar - totalDevolver;
     resumo += `<p><strong>Saldo final (${saldo >= 0 ? "a pagar" : "a receber"}):</strong> ${formatar(Math.abs(saldo))}</p>`;
 
